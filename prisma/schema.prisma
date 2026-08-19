@@ -1,0 +1,79 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum TableStatus {
+  FREE
+  OCCUPIED
+}
+
+enum OrderStatus {
+  PENDING
+  ACCEPTED
+  PREPARING
+  READY
+  SERVED
+  CANCELLED
+}
+
+enum OrderItemStatus {
+  PENDING
+  PREPARING
+  READY
+}
+
+model Table {
+  id          Int         @id @default(autoincrement())
+  tableNumber Int         @unique @map("table_number")
+  status      TableStatus @default(FREE)
+  orders      Order[]
+
+  @@map("tables")
+}
+
+model MenuItem {
+  id          Int         @id @default(autoincrement())
+  name        String
+  price       Decimal     @db.Decimal(10, 2)
+  category    String
+  isAvailable Boolean     @default(true) @map("is_available")
+  orderItems  OrderItem[]
+
+  @@map("menu_items")
+}
+
+model Order {
+  id        Int         @id @default(autoincrement())
+  table     Table       @relation(fields: [tableId], references: [id])
+  tableId   Int         @map("table_id")
+  status    OrderStatus @default(PENDING)
+  waiterId  Int?        @map("waiter_id")
+  createdAt DateTime    @default(now()) @map("created_at")
+  updatedAt DateTime    @updatedAt @map("updated_at")
+  items     OrderItem[]
+
+  @@map("orders")
+}
+
+model OrderItem {
+  id         Int             @id @default(autoincrement())
+  order      Order           @relation(fields: [orderId], references: [id])
+  orderId    Int             @map("order_id")
+  menuItem   MenuItem        @relation(fields: [menuItemId], references: [id])
+  menuItemId Int             @map("menu_item_id")
+  quantity   Int             @default(1)
+  notes      String?
+  status     OrderItemStatus @default(PENDING)
+
+  @@map("order_items")
+}
