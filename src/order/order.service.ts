@@ -3,10 +3,14 @@ import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderDto } from './dto/update-order.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { OrderItemStatus } from 'generated/prisma/enums';
+import { OrdersGateway } from './orders.gateway';
 
 @Injectable()
 export class OrderService {
-  constructor(private prisma: PrismaService) { }
+  constructor(
+    private prisma: PrismaService,
+    private ordersGateway: OrdersGateway
+  ) { }
 
   async create(createOrderDto: CreateOrderDto) {
     const order = await this.prisma.order.create({
@@ -22,6 +26,9 @@ export class OrderService {
       },
       include: { items: true }
     })
+
+    this.ordersGateway.server.to('kitchen').emit('order:created', order)
+
     return { data: order }
   }
 
@@ -40,6 +47,14 @@ export class OrderService {
     const order = await this.prisma.order.findUnique({ where: { id } })
     if (!order) throw new NotFoundException('Order not found');
     const updated = await this.prisma.order.update({ where: { id }, data: updateOrderDto })
+
+
+    this.ordersGateway.server
+      .to('kitchen').emit('order:statusUpdated', updated)
+    this.ordersGateway.server
+      .to(`table-${updated.tableId}`)
+      .emit('order:statusUpdated', updated)
+
     return { data: updated }
   }
 
@@ -58,6 +73,11 @@ export class OrderService {
       where: { id: itemId },
       data: { status },
     });
+
+    this.ordersGateway.server
+      .to('kitchen')
+      .emit('order:itemStatusUpdated', updated)
+
     return { data: updated };
   }
 }

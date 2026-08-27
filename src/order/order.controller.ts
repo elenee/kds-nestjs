@@ -30,7 +30,6 @@ export class OrderController {
 
   @Patch(':id/items/:itemId/status')
   updateOrderItemStatus(
-    @Param('id') id: string,
     @Param('itemId') itemId: string,
     @Body() updateOrderItemStatusDto: UpdateOrderItemStatusDto,
   ) {
