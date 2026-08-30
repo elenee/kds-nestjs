@@ -1,3 +1,5 @@
+import { UnauthorizedException } from '@nestjs/common';
+import { JwtService } from '@nestjs/jwt';
 import { WebSocketGateway, SubscribeMessage, MessageBody, OnGatewayConnection, OnGatewayDisconnect, WebSocketServer, ConnectedSocket } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io'
 
@@ -6,8 +8,22 @@ export class OrdersGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer()
   server!: Server
 
+  constructor(private jwtService: JwtService) { }
+
   handleConnection(client: Socket) {
-    console.log(`Client connected ${client.id}`)
+    try {
+      const token = client.handshake.auth?.token;
+      if (!token) throw new UnauthorizedException('No token provided');
+
+      const payload = this.jwtService.verify(token)
+      client.data.user = payload
+
+      console.log(`Client connected: ${client.id} (${payload.username}, ${payload.role})`)
+    } catch (error: any) {
+      console.log(`Client rejected: ${client.id} - ${error.message}`);
+      client.emit('error', 'Unauthorized');
+      client.disconnect();
+    }
   }
 
   handleDisconnect(client: Socket) {
@@ -16,6 +32,10 @@ export class OrdersGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   @SubscribeMessage('joinKitchen')
   handleJoinKitchen(@ConnectedSocket() client: Socket) {
+    if(client.data.user?.role !== 'KITCHEN' && client.data.user?.role !== 'ADMIN') {
+      client.emit('error', 'Forbidden: kicthen role required')
+      return
+    }
     client.join('kitchen')
     return { event: 'joinedKicthen', data: 'ok' }
   }
