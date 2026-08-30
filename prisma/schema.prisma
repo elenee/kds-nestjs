@@ -78,3 +78,18 @@ model OrderItem {
 
   @@map("order_items")
 }
+
+enum Role {
+  WAITER
+  KITCHEN
+  ADMIN
+}
+
+model User {
+  id       Int    @id @default(autoincrement())
+  username String @unique
+  password String
+  role     Role
+
+  @@map("users")
+}
