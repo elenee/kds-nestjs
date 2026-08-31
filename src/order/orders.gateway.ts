@@ -18,7 +18,7 @@ export class OrdersGateway implements OnGatewayConnection, OnGatewayDisconnect {
       const payload = this.jwtService.verify(token)
       client.data.user = payload
 
-      console.log(`Client connected: ${client.id} (${payload.username}, ${payload.role})`)
+      console.log(`Client connected: ${client.id} (${payload.sub}, ${payload.role})`)
     } catch (error: any) {
       console.log(`Client rejected: ${client.id} - ${error.message}`);
       client.emit('error', 'Unauthorized');
@@ -33,11 +33,11 @@ export class OrdersGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @SubscribeMessage('joinKitchen')
   handleJoinKitchen(@ConnectedSocket() client: Socket) {
     if(client.data.user?.role !== 'KITCHEN' && client.data.user?.role !== 'ADMIN') {
-      client.emit('error', 'Forbidden: kicthen role required')
+      client.emit('error', 'Forbidden: kitchen role required')
       return
     }
     client.join('kitchen')
-    return { event: 'joinedKicthen', data: 'ok' }
+    return { event: 'joinedKitchen', data: 'ok' }
   }
 
   @SubscribeMessage('joinTable')

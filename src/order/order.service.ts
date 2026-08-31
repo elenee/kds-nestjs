@@ -80,4 +80,14 @@ export class OrderService {
 
     return { data: updated };
   }
+
+  async findActive() {
+    const orders = await this.prisma.order.findMany({
+      where: {
+        status: { notIn: ['SERVED', 'CANCELLED'] }
+      },
+      include: { items: true }
+    })
+    return { data: orders }
+  }
 }
