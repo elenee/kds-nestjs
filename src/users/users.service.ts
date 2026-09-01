@@ -2,6 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class UsersService {
@@ -47,5 +48,18 @@ export class UsersService {
     if (!user) throw new NotFoundException('User not found');
     await this.prisma.user.delete({ where: { id } })
     return { data: 'User deleted successfully' }
+  }
+
+  async ensureAdminExists() {
+    const password = process.env.ADMIN_PASSWORD!;
+    const hashed = await bcrypt.hash(password, 10);
+    const existingAdmin = await this.findByUserName('admin');
+    if (existingAdmin) return;
+
+    await this.create({
+      username: 'admin',
+      password: hashed,
+      role: 'ADMIN',
+    });
   }
 }
