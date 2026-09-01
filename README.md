@@ -1,4 +1,4 @@
-# KDS — Kitchen Display System
+# KDS - Kitchen Display System
 
 A real-time kitchen order display system for a hotel cafe, built to explore WebSockets, role-based auth, and horizontal scaling in a NestJS backend.
 
