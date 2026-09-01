@@ -5,7 +5,7 @@ import { UpdateTableDto } from './dto/update-table.dto';
 import { JwtAuthGuard } from 'src/auth/guards/jwt.auth.guard';
 import { RoleGuard } from 'src/auth/guards/role.guard';
 import { Roles } from 'src/auth/decorators/roles.decorator';
-import { Role } from 'generated/prisma/enums';
+import { Role } from 'src/generated/prisma/enums';
 
 @Controller('table')
 @UseGuards(JwtAuthGuard)

@@ -4,9 +4,9 @@ import { SignUpDto } from './dto/sign-up.dto';
 import { JwtAuthGuard } from './guards/jwt.auth.guard';
 import { RoleGuard } from './guards/role.guard';
 import { Roles } from './decorators/roles.decorator';
-import { Role } from 'generated/prisma/enums';
 import { LocalAuthGuard } from './guards/local.auth.guard';
 import { User } from './decorators/user.decorator';
+import { Role } from 'src/generated/prisma/enums';
 
 @Controller('auth')
 export class AuthController {

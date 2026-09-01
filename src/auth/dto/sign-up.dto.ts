@@ -1,5 +1,5 @@
 import { IsEnum, IsNotEmpty, IsString, Length } from "class-validator";
-import { Role } from "generated/prisma/enums";
+import { Role } from "src/generated/prisma/enums";
 
 export class SignUpDto {
     @IsNotEmpty()

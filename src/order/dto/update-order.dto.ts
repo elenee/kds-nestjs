@@ -1,5 +1,5 @@
 import { IsEnum, IsNotEmpty } from 'class-validator';
-import { OrderStatus } from 'generated/prisma/enums';
+import { OrderStatus } from 'src/generated/prisma/enums';
 
 export class UpdateOrderDto {
     @IsNotEmpty()
